@@ -205,6 +205,15 @@ var JsonApiDataStore = (function () {
         model._links = rec.links;
       }
 
+      if (rec.meta) {
+        model._meta = rec.meta;
+        model.meta = {};
+
+        for (key in rec.meta) {
+          model.meta[key] = rec.meta[key];
+        }
+      }
+
       if (rec.relationships) {
         for (key in rec.relationships) {
           var rel = rec.relationships[key];
