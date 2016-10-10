@@ -1,11 +1,11 @@
 /**
  * @class JsonApiDataStoreModel
  */
-"use strict";
+'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var JsonApiDataStoreModel = (function () {
   /**
@@ -38,7 +38,7 @@ var JsonApiDataStoreModel = (function () {
    */
 
   _createClass(JsonApiDataStoreModel, [{
-    key: "serialize",
+    key: 'serialize',
     value: function serialize(opts) {
       var self = this,
           res = { data: { type: this._type } },
@@ -83,7 +83,7 @@ var JsonApiDataStoreModel = (function () {
      * @param {object} value The value of the attribute.
      */
   }, {
-    key: "setAttribute",
+    key: 'setAttribute',
     value: function setAttribute(attrName, value) {
       if (this[attrName] === undefined) this._attributes.push(attrName);
       this[attrName] = value;
@@ -96,7 +96,7 @@ var JsonApiDataStoreModel = (function () {
      * @param {object} models The linked model(s).
      */
   }, {
-    key: "setRelationship",
+    key: 'setRelationship',
     value: function setRelationship(relName, models) {
       if (this[relName] === undefined) this._relationships.push(relName);
       this[relName] = models;
@@ -115,6 +115,7 @@ var JsonApiDataStore = (function () {
     _classCallCheck(this, JsonApiDataStore);
 
     this.graph = {};
+    this.sortedGraph = {};
   }
 
   /**
@@ -124,7 +125,7 @@ var JsonApiDataStore = (function () {
    */
 
   _createClass(JsonApiDataStore, [{
-    key: "destroy",
+    key: 'destroy',
     value: function destroy(model) {
       delete this.graph[model._type][model.id];
     }
@@ -137,7 +138,7 @@ var JsonApiDataStore = (function () {
      * @return {object} The corresponding model if present, and null otherwise.
      */
   }, {
-    key: "find",
+    key: 'find',
     value: function find(type, id) {
       if (!this.graph[type] || !this.graph[type][id]) return null;
       return this.graph[type][id];
@@ -147,17 +148,26 @@ var JsonApiDataStore = (function () {
      * Retrieve all models by type.
      * @method findAll
      * @param {string} type The type of the model.
+     * @param {boolean} if the return result should be ordered as in the response.
      * @return {object} Array of the corresponding model if present, and empty array otherwise.
      */
   }, {
-    key: "findAll",
-    value: function findAll(type) {
+    key: 'findAll',
+    value: function findAll(type, sorted) {
       var self = this;
+      sorted = typeof sorted == 'undefined' ? false : sorted;
 
       if (!this.graph[type]) return [];
-      return Object.keys(self.graph[type]).map(function (v) {
-        return self.graph[type][v];
-      });
+
+      if (sorted) {
+        return self.sortedGraph[type].map(function (v) {
+          return self.graph[type][v];
+        });
+      } else {
+        return Object.keys(self.graph[type]).map(function (v) {
+          return self.graph[type][v];
+        });
+      }
     }
 
     /**
@@ -165,20 +175,24 @@ var JsonApiDataStore = (function () {
      * @method reset
      */
   }, {
-    key: "reset",
+    key: 'reset',
     value: function reset() {
       this.graph = {};
+      this.sortedGraph = {};
     }
   }, {
-    key: "initModel",
+    key: 'initModel',
     value: function initModel(type, id) {
+      this.sortedGraph[type] = this.sortedGraph[type] || [];
+      this.sortedGraph[type].push(id);
+
       this.graph[type] = this.graph[type] || {};
       this.graph[type][id] = this.graph[type][id] || new JsonApiDataStoreModel(type, id);
 
       return this.graph[type][id];
     }
   }, {
-    key: "syncRecord",
+    key: 'syncRecord',
     value: function syncRecord(rec) {
       var self = this,
           model = this.initModel(rec.type, rec.id),
@@ -244,7 +258,7 @@ var JsonApiDataStore = (function () {
      * @return {object} The model/array of models corresponding to the payload's primary resource(s) and any metadata.
      */
   }, {
-    key: "syncWithMeta",
+    key: 'syncWithMeta',
     value: function syncWithMeta(payload) {
       var primary = payload.data,
           syncRecord = this.syncRecord.bind(this);
@@ -263,7 +277,7 @@ var JsonApiDataStore = (function () {
      * @return {object} The model/array of models corresponding to the payload's primary resource(s).
      */
   }, {
-    key: "sync",
+    key: 'sync',
     value: function sync(payload) {
       return this.syncWithMeta(payload).data;
     }
