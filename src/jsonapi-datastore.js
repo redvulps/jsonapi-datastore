@@ -92,6 +92,7 @@ class JsonApiDataStore {
    */
   constructor() {
     this.graph = {};
+    this.sortedGraph = {};
   }
 
   /**
@@ -119,13 +120,20 @@ class JsonApiDataStore {
    * Retrieve all models by type.
    * @method findAll
    * @param {string} type The type of the model.
+   * @param {boolean} if the return result should be ordered as in the response.
    * @return {object} Array of the corresponding model if present, and empty array otherwise.
    */
-  findAll(type) {
+  findAll(type, sorted) {
     var self = this;
+    sorted = typeof(sorted) == 'undefined' ? false : sorted;
 
     if (!this.graph[type]) return [];
-    return Object.keys(self.graph[type]).map(function(v) { return self.graph[type][v]; });
+
+    if (sorted) {
+      return self.sortedGraph[type].map(function(v) { return self.graph[type][v]; });
+    } else {
+      return Object.keys(self.graph[type]).map(function(v) { return self.graph[type][v]; });
+    }
   }
 
   /**
@@ -134,9 +142,13 @@ class JsonApiDataStore {
    */
   reset() {
     this.graph = {};
+    this.sortedGraph = {};
   }
 
   initModel(type, id) {
+    this.sortedGraph[type] = this.sortedGraph[type] || [];
+    this.sortedGraph[type].push(id);
+
     this.graph[type] = this.graph[type] || {};
     this.graph[type][id] = this.graph[type][id] || new JsonApiDataStoreModel(type, id);
 
